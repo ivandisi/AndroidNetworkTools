@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
         SubnetDevices subnetDevices = SubnetDevices.fromLocalAddress().findDevices(new SubnetDevices.OnSubnetDeviceFound() {
             @Override
             public void onDeviceFound(Device device) {
-                appendResultsText("Device: " + device.ip+" "+ device.hostname);
+                appendResultsText("Device: " + device.ip+" "+ device.hostname + " "+ device.time);
             }
 
             @Override
