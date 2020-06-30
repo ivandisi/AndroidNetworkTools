@@ -25,7 +25,6 @@ public class SubnetDevices {
     private int timeOutMillis = 5000;
     private boolean cancelled = false;
     private HashMap<String, String> ipMacHashMap = null;
-    private int pingIteration = 5;
     private Integer[] commonNmap20PortsplusOne = {80, 23, 443, 21, 22, 25, 3389, 110, 445, 139, 143, 53, 135,3306, 8080, 1723, 111, 995, 993 ,5900, 9100};
 
     // This class is not to be instantiated
@@ -141,21 +140,6 @@ public class SubnetDevices {
     }
 
     /**
-     * Sets the iteration for each address we try to ping
-     *
-     * @param iteration - number of iteration for ping test
-     *
-     * @return this object to allow chaining
-     *
-     * @throws IllegalArgumentException - if iteration is less than one
-     */
-    public SubnetDevices setPingIteration(int iteration) throws IllegalArgumentException {
-        if (iteration < 1) throw new IllegalArgumentException("Iteration cannot be less than 1");
-        this.pingIteration = iteration;
-        return this;
-    }
-
-    /**
      * Cancel a running scan
      */
     public void cancel() {
@@ -239,24 +223,21 @@ public class SubnetDevices {
             try {
                 InetAddress ia = InetAddress.getByName(address);
 
-                PingResult pingResult;
+                PingResult pingResult = Ping.onAddress(ia).setTimeOutMillis(timeOutMillis).doPing();
 
-                for (int i = 0; i < pingIteration; i++) {
-                    pingResult = Ping.onAddress(ia).setTimeOutMillis(timeOutMillis).doPing();
+                if (pingResult.isReachable) {
+                    Device device = new Device(ia);
 
-                    if (pingResult.isReachable) {
-                        Device device = new Device(ia);
-
-                        // Add the device MAC address if it is in the cache
-                        if (ipMacHashMap.containsKey(ia.getHostAddress())) {
-                            device.mac = ipMacHashMap.get(ia.getHostAddress());
-                        }
-
-                        device.time = pingResult.timeTaken;
-                        subnetDeviceFound(device);
-                        return;
+                    // Add the device MAC address if it is in the cache
+                    if (ipMacHashMap.containsKey(ia.getHostAddress())) {
+                        device.mac = ipMacHashMap.get(ia.getHostAddress());
                     }
+
+                    device.time = pingResult.timeTaken;
+                    subnetDeviceFound(device);
+                    return;
                 }
+
 
                 // Device could be present but not pingable
                 ArrayList<Integer> list = new ArrayList<Integer>(Arrays.asList(commonNmap20PortsplusOne));
