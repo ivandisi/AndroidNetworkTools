@@ -22,11 +22,11 @@ public class SubnetDevices {
     private ArrayList<String> addresses;
     private ArrayList<Device> devicesFound;
     private OnSubnetDeviceFound listener;
-    private int timeOutMillis = 5000;
+    private int timeOutMillis = 7000;
     private boolean cancelled = false;
     private HashMap<String, String> ipMacHashMap = null;
     private int pingIteration = 5;
-    private Integer[] commonNmap20PortsplusOne = {80, 23, 443, 21, 22, 25, 3389, 110, 445, 139, 143, 53, 135,3306, 8080, 1723, 111, 995, 993 ,5900, 9100};
+    private Integer[] commonports = {80, 9100, 23, 443, 21, 22, 445, 139, 135, 111, 5900};
 
     // This class is not to be instantiated
     private SubnetDevices() {
@@ -259,8 +259,8 @@ public class SubnetDevices {
                 }
 
                 // Device could be present but not pingable
-                ArrayList<Integer> list = new ArrayList<Integer>(Arrays.asList(commonNmap20PortsplusOne));
-                ArrayList<Integer> portsFound = PortScan.onAddress(ia).setMethodTCP().setPorts(list).doScan();
+                ArrayList<Integer> list = new ArrayList<Integer>(Arrays.asList(commonports));
+                ArrayList<Integer> portsFound = PortScan.onAddress(ia).setPorts(list).setMethodTCP().doScan();
 
                 if (portsFound != null && portsFound.size() > 0 ) {
                     Device device = new Device(ia);
